@@ -57,7 +57,7 @@ module Devise
       # Send confirmation token by sms
       def send_sms_token
         if(self.phone?)
-          generate_sms_token! if self.sms_confirmation_token.nil?
+          generate_sms_token! unless @just_generated_sms_token
           ::Devise.sms_sender.send_sms(self.phone, I18n.t(:"devise.sms_activations.sms_body", :sms_confirmation_token => self.sms_confirmation_token, :default => self.sms_confirmation_token))
         else
           self.class.sms_confirmation_keys.each do |key|
@@ -140,6 +140,7 @@ module Devise
         def generate_sms_token
           self.sms_confirmed_at = nil
           self.sms_confirmation_token = rand.to_s[2,4]
+          @just_generated_sms_token = true
           self.confirmation_sms_sent_at = Time.now.utc
         end
 
